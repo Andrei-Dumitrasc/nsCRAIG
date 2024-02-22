@@ -1,16 +1,15 @@
-% Tests the nonsymmetric CRAIG algorithm on two linearized Navier-Stokes
+% Tests the nonsymmetric CRAIG algorithm (nsCRAIG) on two linearized Navier-Stokes
 % problems, and optionally performs comparisons with other approaches 
 % and algorithms (FOM and GMRES).
 
 clear
 clc
-cla
-hold on
-ca=gca;
-ca.YScale='log';
-ylabel('residual norm')
-xlabel('iterations')
 
+cla
+crt_fig=gcf();
+crt_fig.WindowStyle='docked';
+
+subplotidx=1;
 
 % load problem
 % Choices used in the paper: 'NSStepGrid5Visc1Ov100', 'NSCavityGrid5Visc1Ov200'
@@ -60,6 +59,14 @@ d=u-exU;
 'final solver error norms (relative)'
 errU=sqrt( (d'*M*d) / (exU'*M*exU) )
 errP=norm(p-exP)/norm(exP)
+
+% plotting
+subplot(1,2,subplotidx); subplotidx=subplotidx+1;
+hold on
+ca=gca;
+ca.YScale='log';
+ylabel('residual norm')
+xlabel('iterations')
 
 semilogy(relresnorms,'-*','DisplayName','nsCRAIG')
 title(pb.type)

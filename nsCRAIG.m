@@ -1,4 +1,4 @@
-function [V,Q,B,H,residual,relresnorms,vel,pres] = nsGKB(A,b,maxit,tol,M,decoM,ortho_type)
+function [V,Q,B,H,residual,relresnorms,vel,pres] = nsCRAIG(A,b,maxit,tol,M,decoM,ortho_type)
 
 % Generalized Golub-Kahan bidiagonalization for saddle-point matrices with
 % a nonsymmetric leading block. 
