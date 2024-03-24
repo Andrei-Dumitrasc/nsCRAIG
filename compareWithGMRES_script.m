@@ -14,6 +14,11 @@ for restart_as_nsCRAIG=restart_GMRES
         nsCRAIG_iter=length(relresnorms);
         mem_nsCRAIG=m+n*(nsCRAIG_iter+1);
         restart_m=floor(mem_nsCRAIG/(m+n));
+        if restart_m<5
+            warning("Using restart_as_nsCRAIG=1 gives restart_m<5." + ...
+            " Skipping restarted run.")
+            continue
+        end
     else
         restart_m=GMRES_max_iter; % full / unrestarted
     end
@@ -23,14 +28,16 @@ for restart_as_nsCRAIG=restart_GMRES
     relresnorms_G=1;
     start_x=zeros(m+n,1);
     beta0=norm(Gb);
-    while relresnorms_G(end)>solve_tol
+    iter_left=min([restart_m,GMRES_max_iter]); 
+    while relresnorms_G(end)>solve_tol && iter_left>0
         [X_GMRES,relresnorms_G_part,V_myG,H_myG,beta0_myG] = ...
             myGMRES(myG_matvecdata,Gb,start_x,solve_tol,...
-            min([restart_m,GMRES_max_iter-elapsed_its]),reortho);
+            iter_left,reortho);
         elapsed_its=elapsed_its+length(relresnorms_G_part)-1;
         % renormalize residual norm w.r.t. original problem            
         relresnorms_G=[relresnorms_G; relresnorms_G_part(2:end)*beta0_myG/beta0];
         start_x=X_GMRES;
+            iter_left=min([restart_m,GMRES_max_iter-elapsed_its]);
     end
     'myGMRES time'
     if restart_as_nsCRAIG, 'with restarts', end 
@@ -47,10 +54,11 @@ for restart_as_nsCRAIG=restart_GMRES
         gmres_name=[gmres_name,'(',num2str(restart_m),')'];
     else
         % 'memory GMRES / memory nsCRAIG'
-        mem_GMRES=(m+n)*(length(relresnorms_G)+1);
+        memGMRES=(m+n)*(length(relresnorms_G)+1);
+        memGK=m+n*(length(relresnorms)+1);
         ax=gca;
         ax.Title.String=[ax.Title.String, '. memory ratio=', ...
-            num2str(mem_GMRES/mem_nsCRAIG) ];
+            num2str(memGMRES/memGK) ];
         
     end
     semilogy(relresnorms_G,'-p','DisplayName',gmres_name)
